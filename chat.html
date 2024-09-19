@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Group Chat Room</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.7.2/font/bootstrap-icons.css">
+    <link rel="stylesheet" href="/styles.css">
+    <script src="/socket.io/socket.io.js"></script>
+    <script src="https://unpkg.com/emoji-picker-element"></script>
+</head>
+<body class="d-flex flex-column vh-100">
+    <nav class="navbar navbar-expand-lg navbar-dark bg-primary">
+        <div class="container-fluid">
+            <a class="navbar-brand" href="#">Chat Room: <span id="roomName"></span></a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav ms-auto">
+                    <li class="nav-item">
+                        <button id="leaveChat" class="btn btn-light">Leave Chat</button>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </nav>
+
+    <main class="flex-grow-1 d-flex flex-column overflow-hidden">
+        <div class="container-fluid h-100 py-3">
+            <div class="row h-100">
+                <div class="col-md-3 mb-3">
+                    <div class="card h-100">
+                        <div class="card-header bg-primary text-white">
+                            <h5 class="card-title mb-0">Participants</h5>
+                        </div>
+                        <div class="card-body">
+                            <ul id="participantsList" class="list-group list-group-flush">
+                                <!-- Participants will be dynamically added here -->
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-9 d-flex flex-column">
+                    <div class="card flex-grow-1 mb-3">
+                        <div class="card-body" id="chatMessages">
+                            <!-- Chat messages will be dynamically added here -->
+                        </div>
+                    </div>
+                    <div id="typingIndicator" class="text-muted small mb-2" style="display: none;"></div>
+                    <form id="messageForm" class="mt-auto">
+                        <div class="input-group">
+                            <input type="text" id="messageInput" class="form-control" placeholder="Type your message..." required>
+                            <button type="submit" class="btn btn-primary">
+                                <i class="bi bi-send"></i> Send
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <footer class="bg-gradient-dark text-white py-2">
+        <div class="container text-center">
+            <p class="mb-0">© 2024 Group Chat. All rights reserved.</p>
+        </div>
+    </footer>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="/chat.js"></script>
+</body>
+</html>

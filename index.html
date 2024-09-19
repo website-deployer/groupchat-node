@@ -1,0 +1,143 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Group Chat</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body class="d-flex flex-column min-vh-100">
+    <header class="bg-primary text-white py-4">
+        <div class="container">
+            <div class="row align-items-center">
+                <div class="col-md-6">
+                    <h1 class="mb-0">Group Chat</h1>
+                </div>
+                <div class="col-md-6">
+                    <nav>
+                        <ul class="nav justify-content-end">
+                            <li class="nav-item"><a class="nav-link text-white" href="#features">Features</a></li>
+                            <li class="nav-item"><a class="nav-link text-white" href="#join">Join Chat</a></li>
+                            <li class="nav-item"><a class="nav-link text-white" href="#about">About</a></li>
+                        </ul>
+                    </nav>
+                </div>
+            </div>
+        </div>
+    </header>
+    <main class="container my-5 flex-grow-1">
+      <section class="text-center mb-5">
+            <h2 class="display-4 mb-3">Connect Instantly</h2>
+            <p class="lead mb-4">Experience real-time group conversations with our easy-to-use chat platform.</p>
+            <a href="#join" class="btn btn-primary btn-lg px-5 py-3">Start Chatting Now</a>
+        </section>
+        <div class="row">
+            <div class="col-md-6 mb-5">
+                <section id="features">
+                    <h2 class="h3 mb-4">Our Features</h2>
+                    <ul class="list-group list-group-flush">
+                        <li class="list-group-item">✨ Real-time messaging</li>
+                        <li class="list-group-item">📁 File sharing</li>
+                        <li class="list-group-item">😊 Custom emojis</li>
+                        <li class="list-group-item">🔒 Private and public groups</li>
+                    </ul>
+                </section>
+            </div>
+            <div class="col-md-6 mb-5">
+                <section id="join">
+                    <h2 class="h3 mb-4">Join a Chat Room</h2>
+                    <form action="/join" method="POST">
+                        <div class="mb-3">
+                            <input type="text" name="name" class="form-control form-control-lg" placeholder="Enter your name" required>
+                        </div>
+                        <div class="mb-3">
+                            <input type="text" name="roomCode" class="form-control form-control-lg" placeholder="Enter room code" required>
+                        </div>
+                        <button type="submit" class="btn btn-success btn-lg w-100">Join Chat</button>
+                    </form>
+                </section>
+            </div>
+        </div>
+        <section id="about" class="bg-light p-5 rounded">
+            <h2 class="h3 mb-4">About Us</h2>
+            <p class="mb-3">We're passionate about bringing people together through seamless communication. Our platform is designed to make group chats easy, fun, and accessible to everyone.</p>
+            <p class="mb-3">Founded in 2024, Group Chat has quickly become a go-to solution for teams, friends, and communities looking to stay connected in real-time. Our dedicated team of developers and designers work tirelessly to ensure that our platform remains at the forefront of online communication technology.</p>
+            <p class="mb-0">Whether you're collaborating on a project, planning an event, or just catching up with friends, Group Chat provides the tools you need to communicate effectively and build stronger connections.</p>
+        </section>
+    </main>
+    <footer class="bg-gradient-dark text-white py-5 mt-5">
+        <div class="container">
+            <div class="row">
+                <div class="col-md-4 mb-4 mb-md-0">
+                    <h5 class="mb-3 text-primary">Quick Links</h5>
+                    <ul class="list-unstyled">
+                        <li class="mb-2"><a href="#features" class="text-white text-decoration-none hover-effect">Features</a></li>
+                        <li class="mb-2"><a href="#join" class="text-white text-decoration-none hover-effect">Join Chat</a></li>
+                        <li class="mb-2"><a href="#about" class="text-white text-decoration-none hover-effect">About Us</a></li>
+                    </ul>
+                </div>
+                <div class="col-md-4 mb-4 mb-md-0">
+                    <h5 class="mb-3 text-primary">Contact Us</h5>
+                    <p class="mb-1"><i class="bi bi-envelope-fill me-2"></i>support@groupchat.com</p>
+                    <p><i class="bi bi-telephone-fill me-2"></i>(123) 456-7890</p>
+                </div>
+                <div class="col-md-4 mb-4 mb-md-0">
+                    <h5 class="mb-3 text-primary">Stay Connected</h5>
+                    <ul class="list-inline">
+                        <li class="list-inline-item mb-2 d-block"><a href="#" class="text-white text-decoration-none hover-effect social-link" data-platform="Facebook">Facebook</a></li>
+                        <li class="list-inline-item mb-2 d-block"><a href="#" class="text-white text-decoration-none hover-effect social-link" data-platform="Twitter">Twitter</a></li>
+                        <li class="list-inline-item mb-2 d-block"><a href="#" class="text-white text-decoration-none hover-effect social-link" data-platform="Instagram">Instagram</a></li>
+                        <li class="list-inline-item mb-2 d-block"><a href="#" class="text-white text-decoration-none hover-effect social-link" data-platform="LinkedIn">LinkedIn</a></li>
+                        <li class="list-inline-item mb-2 d-block"><a href="#" class="text-white text-decoration-none hover-effect social-link" data-platform="GitHub">GitHub</a></li>
+                    </ul>
+                </div>
+            </div>
+            <hr class="my-4 bg-light">
+            <div class="text-center">
+                <p class="mb-0">© 2024 Group Chat. All rights reserved.</p>
+            </div>
+        </div>
+    </footer>
+    
+    <div class="toast-container position-fixed bottom-0 end-0 p-3">
+        <div id="socialToast" class="toast" role="alert" aria-live="assertive" aria-atomic="true">
+            <div class="toast-header">
+                <strong class="me-auto">Notification</strong>
+                <button type="button" class="btn-close" data-bs-dismiss="toast" aria-label="Close"></button>
+            </div>
+            <div class="toast-body">
+                There are no contacts for this link.
+            </div>
+        </div>
+    </div>
+
+    <style>
+        .bg-gradient-dark {
+            background: linear-gradient(45deg, #1a1a1a, #2c3e50);
+        }
+        .hover-effect:hover {
+            color: #007bff !important;
+            transition: color 0.3s ease;
+        }
+    </style>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="app.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const socialLinks = document.querySelectorAll('.social-link');
+            const toast = new bootstrap.Toast(document.getElementById('socialToast'));
+
+            socialLinks.forEach(link => {
+                link.addEventListener('click', function(e) {
+                    e.preventDefault();
+                    const platform = this.getAttribute('data-platform');
+                    document.querySelector('#socialToast .toast-body').textContent = `There are no contacts for ${platform}.`;
+                    toast.show();
+                });
+            });
+        });
+    </script>
+</body>
+</html>
