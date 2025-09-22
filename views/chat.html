@@ -22,9 +22,17 @@
                     <i class="bi bi-hash me-2"></i><span id="roomName">general</span>
                 </a>
             </div>
-            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
-                <span class="navbar-toggler-icon"></span>
-            </button>
+            <div class="d-flex align-items-center">
+                <button class="btn btn-outline-secondary d-md-none me-2 position-relative" id="membersToggle" title="Toggle Members">
+                    <i class="bi bi-people"></i>
+                    <span class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-success" id="memberCount" style="font-size: 0.6rem; display: none;">
+                        0
+                    </span>
+                </button>
+                <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+                    <span class="navbar-toggler-icon"></span>
+                </button>
+            </div>
             <div class="collapse navbar-collapse" id="navbarNav">
                 <ul class="navbar-nav ms-auto">
                     <li class="nav-item">
@@ -82,6 +90,22 @@
         </div>
     </main>
 
+    <!-- Mobile Members Overlay -->
+    <div id="mobileMembersOverlay" class="mobile-members-overlay d-md-none">
+        <div class="mobile-members-content">
+            <div class="mobile-members-header">
+                <h5 class="mb-0">
+                    <i class="bi bi-people-fill me-2"></i>Members
+                </h5>
+                <button class="btn-close" id="closeMembersOverlay"></button>
+            </div>
+            <div class="mobile-members-body">
+                <ul id="mobileParticipantsList" class="list-group list-group-flush">
+                    <!-- Participants will be dynamically added here -->
+                </ul>
+            </div>
+        </div>
+    </div>
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.bundle.min.js"></script>
     <script src="/chat.js"></script>

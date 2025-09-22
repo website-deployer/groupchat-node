@@ -57,42 +57,67 @@ socket.on('reconnect_failed', () => {
   updateConnectionStatus('failed');
 });
 
+// Network status detection
+window.addEventListener('online', () => {
+  console.log('Network connection restored');
+  updateConnectionStatus('reconnecting');
+});
+
+window.addEventListener('offline', () => {
+  console.log('Network connection lost');
+  updateConnectionStatus('disconnected');
+});
+
 // Update connection status UI
 function updateConnectionStatus(status) {
+  console.log('Updating connection status to:', status);
+  
   let statusElement = document.getElementById('connectionStatus');
   if (!statusElement) {
     const container = document.querySelector('.discord-navbar .container-fluid');
-    if (!container) return; // Exit if container doesn't exist
+    if (!container) {
+      console.error('Navbar container not found');
+      return;
+    }
     
     const statusDiv = document.createElement('div');
     statusDiv.id = 'connectionStatus';
     statusDiv.className = 'connection-status';
     container.appendChild(statusDiv);
     statusElement = statusDiv;
+    console.log('Created connection status element');
   }
+  
+  // Clear any existing classes
+  statusElement.className = 'connection-status';
   
   switch (status) {
     case 'connected':
-      statusElement.innerHTML = '<i class="bi bi-wifi text-success"></i> Connected';
-      statusElement.className = 'connection-status text-success';
+      statusElement.innerHTML = '<i class="bi bi-wifi"></i> Connected';
+      statusElement.classList.add('text-success');
       break;
     case 'disconnected':
-      statusElement.innerHTML = '<i class="bi bi-wifi-off text-warning"></i> Disconnected';
-      statusElement.className = 'connection-status text-warning';
+      statusElement.innerHTML = '<i class="bi bi-wifi-off"></i> Disconnected';
+      statusElement.classList.add('text-warning');
       break;
     case 'reconnecting':
-      statusElement.innerHTML = `<i class="bi bi-arrow-clockwise text-info"></i> Reconnecting... (${reconnectAttempts})`;
-      statusElement.className = 'connection-status text-info';
+      statusElement.innerHTML = `<i class="bi bi-arrow-clockwise"></i> Reconnecting... (${reconnectAttempts})`;
+      statusElement.classList.add('text-info');
       break;
     case 'error':
-      statusElement.innerHTML = '<i class="bi bi-exclamation-triangle text-danger"></i> Connection Error';
-      statusElement.className = 'connection-status text-danger';
+      statusElement.innerHTML = '<i class="bi bi-exclamation-triangle"></i> Connection Error';
+      statusElement.classList.add('text-danger');
       break;
     case 'failed':
-      statusElement.innerHTML = '<i class="bi bi-x-circle text-danger"></i> Connection Failed';
-      statusElement.className = 'connection-status text-danger';
+      statusElement.innerHTML = '<i class="bi bi-x-circle"></i> Connection Failed';
+      statusElement.classList.add('text-danger');
       break;
+    default:
+      console.warn('Unknown connection status:', status);
   }
+  
+  // Force a reflow to ensure the change is visible
+  statusElement.offsetHeight;
 }
 
 let isTabActive = true;
@@ -181,6 +206,9 @@ function outputMessage(message, shouldScroll = true) {
 
 function outputUsers(users) {
     const participantsList = document.getElementById('participantsList');
+    const mobileParticipantsList = document.getElementById('mobileParticipantsList');
+    const memberCount = document.getElementById('memberCount');
+    
     if (!participantsList) {
         console.error('Participants list container not found');
         return;
@@ -191,7 +219,7 @@ function outputUsers(users) {
         return;
     }
     
-    participantsList.innerHTML = `
+    const usersHTML = `
         ${users.map(user => `
             <li class="list-group-item">
                 <div class="d-flex align-items-center">
@@ -204,6 +232,23 @@ function outputUsers(users) {
             </li>
         `).join('')}
     `;
+    
+    participantsList.innerHTML = usersHTML;
+    
+    // Update mobile participants list if it exists
+    if (mobileParticipantsList) {
+        mobileParticipantsList.innerHTML = usersHTML;
+    }
+    
+    // Update member count badge
+    if (memberCount) {
+        if (users.length > 0) {
+            memberCount.textContent = users.length;
+            memberCount.style.display = 'block';
+        } else {
+            memberCount.style.display = 'none';
+        }
+    }
 }
 
 function scrollToBottom() {
@@ -281,6 +326,38 @@ document.addEventListener('DOMContentLoaded', () => {
     if (leaveChatBtn) {
         leaveChatBtn.addEventListener('click', () => {
             window.location = '/';
+        });
+    }
+
+    // Mobile members toggle
+    const membersToggle = document.getElementById('membersToggle');
+    const mobileMembersOverlay = document.getElementById('mobileMembersOverlay');
+    const closeMembersOverlay = document.getElementById('closeMembersOverlay');
+    
+    if (membersToggle && mobileMembersOverlay) {
+        membersToggle.addEventListener('click', () => {
+            mobileMembersOverlay.classList.add('show');
+            // Copy members to mobile list
+            const participantsList = document.getElementById('participantsList');
+            const mobileParticipantsList = document.getElementById('mobileParticipantsList');
+            if (participantsList && mobileParticipantsList) {
+                mobileParticipantsList.innerHTML = participantsList.innerHTML;
+            }
+        });
+    }
+    
+    if (closeMembersOverlay && mobileMembersOverlay) {
+        closeMembersOverlay.addEventListener('click', () => {
+            mobileMembersOverlay.classList.remove('show');
+        });
+    }
+    
+    // Close overlay when clicking outside
+    if (mobileMembersOverlay) {
+        mobileMembersOverlay.addEventListener('click', (e) => {
+            if (e.target === mobileMembersOverlay) {
+                mobileMembersOverlay.classList.remove('show');
+            }
         });
     }
 

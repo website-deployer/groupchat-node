@@ -782,33 +782,81 @@ body.discord-theme {
     box-shadow: 0 0 6px var(--discord-warning);
 }
 
-/* Responsive Design */
+/* Landing Page Responsive Design */
 @media (max-width: 768px) {
     .hero-title {
         font-size: 2.5rem;
     }
     
+    .hero-subtitle {
+        font-size: 1.1rem;
+        margin-bottom: 2rem;
+    }
+    
     .hero-buttons {
         flex-direction: column;
         align-items: center;
+        gap: 1rem;
     }
     
     .discord-btn-primary,
     .discord-btn-secondary {
         width: 100%;
         max-width: 300px;
+        padding: 0.875rem 1.5rem;
     }
     
     .features-grid {
         grid-template-columns: 1fr;
+        gap: 1.5rem;
     }
     
     .stats-grid {
-        grid-template-columns: repeat(3, 1fr);
+        grid-template-columns: repeat(2, 1fr);
+        gap: 1rem;
     }
     
     .discord-card {
         padding: 1.5rem;
+    }
+    
+    .discord-header {
+        padding: 1.5rem 0;
+    }
+    
+    .chatify-logo {
+        width: 50px;
+        height: 50px;
+    }
+    
+    .chatify-title {
+        font-size: 2rem;
+    }
+}
+
+@media (max-width: 480px) {
+    .hero-title {
+        font-size: 2rem;
+    }
+    
+    .hero-subtitle {
+        font-size: 1rem;
+    }
+    
+    .stats-grid {
+        grid-template-columns: 1fr;
+    }
+    
+    .discord-card {
+        padding: 1rem;
+    }
+    
+    .chatify-title {
+        font-size: 1.75rem;
+    }
+    
+    .discord-header {
+        padding: 1rem 0;
     }
 }
 
@@ -933,20 +981,234 @@ body.discord-theme {
     }
 }
 
+/* Mobile Responsive Design */
 @media (max-width: 768px) {
+    /* Connection Status */
     .connection-status {
-        right: 1rem;
+        right: 6rem; /* Move left to avoid overlap with buttons */
         max-width: 140px;
         font-size: 0.7rem;
+    }
+    
+    /* Chat Layout */
+    .discord-chat {
+        height: 100vh;
+        overflow: hidden;
+    }
+    
+    .discord-navbar {
+        padding: 0.5rem 0;
+        min-height: 60px;
+    }
+    
+    .discord-navbar .navbar-brand {
+        font-size: 1rem;
+    }
+    
+    .discord-navbar .btn {
+        padding: 0.4rem 0.8rem;
+        font-size: 0.8rem;
+    }
+    
+    /* Mobile members button styling */
+    #membersToggle {
+        background: var(--discord-accent) !important;
+        border-color: var(--discord-accent) !important;
+        color: white !important;
+    }
+    
+    #membersToggle:hover {
+        background: var(--discord-accent-hover) !important;
+        border-color: var(--discord-accent-hover) !important;
+    }
+    
+    /* Sidebar - Hide on mobile */
+    .discord-sidebar {
+        display: none;
+    }
+    
+    /* Chat Area - Full width on mobile */
+    .discord-chat-area {
+        height: calc(100vh - 60px);
+        border-radius: 0;
+    }
+    
+    .discord-messages {
+        padding: 1rem;
+        height: calc(100vh - 140px);
     }
     
     .discord-input-group {
         padding: 0.75rem 1rem;
         gap: 0.5rem;
+        flex-wrap: wrap;
+    }
+    
+    .discord-message-input {
+        min-height: 40px;
+        font-size: 0.9rem;
+        padding: 0.75rem 1rem;
+    }
+    
+    .discord-input-group .btn {
+        min-width: 40px;
+        height: 40px;
+        padding: 0.5rem;
+    }
+    
+    .discord-send-btn {
+        min-width: 40px;
+        height: 40px;
+        padding: 0.5rem;
+    }
+    
+    /* Message styling */
+    .discord-message {
+        margin-bottom: 1rem;
+        padding: 0.5rem 0;
+    }
+    
+    .discord-message-avatar {
+        width: 32px;
+        height: 32px;
+        font-size: 0.8rem;
+    }
+    
+    .discord-message-username {
+        font-size: 0.9rem;
+    }
+    
+    .discord-message-time {
+        font-size: 0.75rem;
+    }
+    
+    .discord-message-text {
+        font-size: 0.9rem;
+        line-height: 1.4;
+    }
+    
+    /* Typing indicator */
+    .discord-typing {
+        font-size: 0.8rem;
+        padding: 0.5rem 1rem;
+    }
+    
+    /* Mobile Members Overlay */
+    .mobile-members-overlay {
+        position: fixed;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background: rgba(0, 0, 0, 0.8);
+        z-index: 1050;
+        display: none;
+        align-items: center;
+        justify-content: center;
+        padding: 1rem;
+    }
+    
+    .mobile-members-overlay.show {
+        display: flex;
+    }
+    
+    .mobile-members-content {
+        background: var(--discord-bg-secondary);
+        border: 1px solid var(--discord-border);
+        border-radius: var(--discord-radius-lg);
+        width: 100%;
+        max-width: 400px;
+        max-height: 80vh;
+        display: flex;
+        flex-direction: column;
+        overflow: hidden;
+    }
+    
+    .mobile-members-header {
+        background: var(--discord-bg-tertiary);
+        border-bottom: 1px solid var(--discord-border);
+        padding: 1rem;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        color: var(--discord-text);
+    }
+    
+    .mobile-members-body {
+        flex: 1;
+        overflow-y: auto;
+        max-height: 60vh;
+    }
+    
+    .mobile-members-body .list-group-item {
+        background: transparent !important;
+        border: none !important;
+        color: var(--discord-text-secondary) !important;
+        padding: 0.75rem 1rem;
+    }
+    
+    .mobile-members-body .list-group-item:hover {
+        background: rgba(255, 255, 255, 0.1) !important;
+        color: var(--discord-text) !important;
+    }
+}
+
+/* Tablet Responsive Design */
+@media (max-width: 992px) and (min-width: 769px) {
+    .discord-sidebar {
+        width: 250px;
+    }
+    
+    .discord-chat-area {
+        width: calc(100% - 250px);
     }
     
     .discord-messages {
-        padding: 1rem 1.5rem;
+        padding: 1.25rem 1.5rem;
+    }
+    
+    .discord-input-group {
+        padding: 1rem 1.25rem;
+        gap: 0.6rem;
+    }
+}
+
+/* Small Mobile Design */
+@media (max-width: 480px) {
+    .discord-navbar .container-fluid {
+        padding: 0 1rem;
+    }
+    
+    .discord-navbar .navbar-brand {
+        font-size: 0.9rem;
+    }
+    
+    .discord-messages {
+        padding: 0.75rem;
+    }
+    
+    .discord-input-group {
+        padding: 0.5rem 0.75rem;
+        gap: 0.4rem;
+    }
+    
+    .discord-message-input {
+        font-size: 0.85rem;
+        padding: 0.6rem 0.8rem;
+    }
+    
+    .discord-input-group .btn,
+    .discord-send-btn {
+        min-width: 36px;
+        height: 36px;
+        padding: 0.4rem;
+    }
+    
+    .connection-status {
+        right: 4rem; /* Move left to avoid overlap with buttons */
+        max-width: 120px;
+        font-size: 0.65rem;
+        padding: 0.2rem 0.4rem;
     }
 }
 
