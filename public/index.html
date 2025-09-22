@@ -3,140 +3,232 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Group Chat</title>
+    <title>Chatify - Next-Gen Communication</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.7.2/font/bootstrap-icons.css">
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap">
     <link rel="stylesheet" href="styles.css">
 </head>
-<body class="d-flex flex-column min-vh-100">
-    <header class="bg-primary text-white py-4">
+<body class="discord-theme">
+    <header class="discord-header">
         <div class="container">
             <div class="row align-items-center">
                 <div class="col-md-6">
-                    <h1 class="mb-0">Group Chat</h1>
+                    <div class="d-flex align-items-center">
+                        <div class="chatify-logo me-3">
+                            <img src="logo.webp" alt="Chatify Logo" class="logo-image">
+                        </div>
+                        <h1 class="mb-0 chatify-title">Chatify</h1>
+                    </div>
                 </div>
                 <div class="col-md-6">
                     <nav>
                         <ul class="nav justify-content-end">
-                            <li class="nav-item"><a class="nav-link text-white" href="#features">Features</a></li>
-                            <li class="nav-item"><a class="nav-link text-white" href="#join">Join Chat</a></li>
-                            <li class="nav-item"><a class="nav-link text-white" href="#about">About</a></li>
+                            <li class="nav-item"><a class="nav-link discord-nav-link" href="#features">Features</a></li>
+                            <li class="nav-item"><a class="nav-link discord-nav-link" href="#join">Join Chat</a></li>
+                            <li class="nav-item"><a class="nav-link discord-nav-link" href="#about">About</a></li>
                         </ul>
                     </nav>
                 </div>
             </div>
         </div>
     </header>
-    <main class="container my-5 flex-grow-1">
-      <section class="text-center mb-5">
-            <h2 class="display-4 mb-3">Connect Instantly</h2>
-            <p class="lead mb-4">Experience real-time group conversations with our easy-to-use chat platform.</p>
-            <a href="#join" class="btn btn-primary btn-lg px-5 py-3">Start Chatting Now</a>
-        </section>
+    <main class="discord-main">
+        <div class="hero-section">
+            <div class="container">
+                <div class="row justify-content-center">
+                    <div class="col-lg-8 text-center">
+                        <div class="hero-content">
+                        <h1 class="hero-title">Where Ideas Connect & Thrive</h1>
+                        <p class="hero-subtitle">Experience the future of communication with Chatify - where every conversation becomes a hub of innovation, creativity, and collaboration.</p>
+                            <div class="hero-buttons">
+                                <a href="#join" class="btn discord-btn-primary btn-lg">
+                                    <i class="bi bi-rocket-takeoff me-2"></i>Start Chatting
+                                </a>
+                                <a href="#features" class="btn discord-btn-secondary btn-lg">
+                                    <i class="bi bi-play-circle me-2"></i>Watch Demo
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="features-section">
+            <div class="container">
         <div class="row">
-            <div class="col-md-6 mb-5">
-                <section id="features">
-                    <h2 class="h3 mb-4">Our Features</h2>
-                    <ul class="list-group list-group-flush">
-                        <li class="list-group-item">✨ Real-time messaging</li>
-                        <li class="list-group-item">📁 File sharing</li>
-                        <li class="list-group-item">😊 Custom emojis</li>
-                        <li class="list-group-item">🔒 Private and public groups</li>
-                    </ul>
+                    <div class="col-lg-6 mb-5">
+                        <section id="features" class="discord-card">
+                            <h2 class="section-title">Powerful Features</h2>
+                            <div class="features-grid">
+                                <div class="feature-item">
+                                    <div class="feature-icon">
+                                        <i class="bi bi-lightning-charge-fill"></i>
+                                    </div>
+                                    <div class="feature-content">
+                                        <h4>Real-time Messaging</h4>
+                                        <p>Lightning-fast message delivery with typing indicators</p>
+                                    </div>
+                                </div>
+                                <div class="feature-item">
+                                    <div class="feature-icon">
+                                        <i class="bi bi-shield-check"></i>
+                                    </div>
+                                    <div class="feature-content">
+                                        <h4>Secure & Private</h4>
+                                        <p>End-to-end encryption for all your conversations</p>
+                                    </div>
+                                </div>
+                                <div class="feature-item">
+                                    <div class="feature-icon">
+                                        <i class="bi bi-emoji-smile"></i>
+                                    </div>
+                                    <div class="feature-content">
+                                        <h4>Rich Media</h4>
+                                        <p>Share files, images, and express with custom emojis</p>
+                                    </div>
+                                </div>
+                                <div class="feature-item">
+                                    <div class="feature-icon">
+                                        <i class="bi bi-people-fill"></i>
+                                    </div>
+                                    <div class="feature-content">
+                                        <h4>Group Management</h4>
+                                        <p>Create channels, manage roles, and moderate discussions</p>
+                                    </div>
+                                </div>
+                            </div>
                 </section>
             </div>
-            <div class="col-md-6 mb-5">
-                <section id="join">
-                    <h2 class="h3 mb-4">Join a Chat Room</h2>
-                    <form action="/join" method="POST">
-                        <div class="mb-3">
-                            <input type="text" name="name" class="form-control form-control-lg" placeholder="Enter your name" required>
+                    <div class="col-lg-6 mb-5">
+                        <section id="join" class="discord-card">
+                            <h2 class="section-title">Join a Server</h2>
+                            <form action="/join" method="POST" class="join-form">
+                                <div class="form-group">
+                                    <label for="name" class="form-label">Display Name</label>
+                                    <input type="text" name="name" id="name" class="discord-input" placeholder="Enter your display name" required>
                         </div>
-                        <div class="mb-3">
-                            <input type="text" name="roomCode" class="form-control form-control-lg" placeholder="Enter room code" required>
+                                <div class="form-group">
+                                    <label for="roomCode" class="form-label">Server Code</label>
+                                    <input type="text" name="roomCode" id="roomCode" class="discord-input" placeholder="Enter server code" required>
                         </div>
-                        <button type="submit" class="btn btn-success btn-lg w-100">Join Chat</button>
+                                <button type="submit" class="btn discord-btn-primary w-100">
+                                    <i class="bi bi-arrow-right-circle me-2"></i>Join Server
+                                </button>
                     </form>
                 </section>
             </div>
         </div>
-        <section id="about" class="bg-light p-5 rounded">
-            <h2 class="h3 mb-4">About Us</h2>
-            <p class="mb-3">We're passionate about bringing people together through seamless communication. Our platform is designed to make group chats easy, fun, and accessible to everyone.</p>
-            <p class="mb-3">Founded in 2024, Group Chat has quickly become a go-to solution for teams, friends, and communities looking to stay connected in real-time. Our dedicated team of developers and designers work tirelessly to ensure that our platform remains at the forefront of online communication technology.</p>
-            <p class="mb-0">Whether you're collaborating on a project, planning an event, or just catching up with friends, Group Chat provides the tools you need to communicate effectively and build stronger connections.</p>
+            </div>
+        </div>
+        <div class="about-section">
+            <div class="container">
+                <section id="about" class="discord-card">
+                    <h2 class="section-title">About Chatify<h2>
+                    <div class="row">
+                        <div class="col-lg-8">
+                            <p class="about-text">We're passionate about bringing people together through seamless communication. Our platform is designed to make group chats easy, fun, and accessible to everyone.</p>
+                            <p class="about-text">Founded in 2024, Chatify has quickly become a go-to solution for teams, friends, and communities looking to stay connected in real-time. Our dedicated team of I work all day to make sure it looks good.</p>
+                            <p class="about-text">Whether you're collaborating on a project, planning an event, or just catching up with friends, Chatify provides the tools you need to communicate effectively and build stronger connections.</p>
+                        </div>
+                        <div class="col-lg-4">
+                            <div class="stats-grid">
+                                <div class="stat-item">
+                                    <div class="stat-number">1M+</div>
+                                    <div class="stat-label">Active Data Transfers</div>
+                                </div>
+                                <div class="stat-item">
+                                    <div class="stat-number">50K+</div>
+                                    <div class="stat-label">Servers</div>
+                                </div>
+                                <div class="stat-item">
+                                    <div class="stat-number">99.9%</div>
+                                    <div class="stat-label">Uptime</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
         </section>
+            </div>
+        </div>
     </main>
-    <footer class="bg-gradient-dark text-white py-5 mt-5">
+    <footer class="discord-footer">
         <div class="container">
             <div class="row">
-                <div class="col-md-4 mb-4 mb-md-0">
-                    <h5 class="mb-3 text-primary">Quick Links</h5>
-                    <ul class="list-unstyled">
-                        <li class="mb-2"><a href="#features" class="text-white text-decoration-none hover-effect">Features</a></li>
-                        <li class="mb-2"><a href="#join" class="text-white text-decoration-none hover-effect">Join Chat</a></li>
-                        <li class="mb-2"><a href="#about" class="text-white text-decoration-none hover-effect">About Us</a></li>
+                <div class="col-lg-4 mb-4">
+                    <div class="footer-brand">
+                        <div class="discord-logo me-3">
+                            <i class="bi bi-chat-dots-fill"></i>
+                        </div>
+                        <h5>Chatify</h5>
+                    </div>
+                    <p class="footer-text">The future of communication is here. Join us at HCHS.</p>
+                </div>
+                <div class="col-lg-2 mb-4">
+                    <h6 class="footer-title">Product</h6>
+                    <ul class="footer-links">
+                        <li><a href="#features">Features</a></li>
+                        <li><a href="#join">Join Server</a></li>
+                        <li><a href="#">Download</a></li>
                     </ul>
                 </div>
-                <div class="col-md-4 mb-4 mb-md-0">
-                    <h5 class="mb-3 text-primary">Contact Us</h5>
-                    <p class="mb-1"><i class="bi bi-envelope-fill me-2"></i>support@groupchat.com</p>
-                    <p><i class="bi bi-telephone-fill me-2"></i>(123) 456-7890</p>
-                </div>
-                <div class="col-md-4 mb-4 mb-md-0">
-                    <h5 class="mb-3 text-primary">Stay Connected</h5>
-                    <ul class="list-inline">
-                        <li class="list-inline-item mb-2 d-block"><a href="#" class="text-white text-decoration-none hover-effect social-link" data-platform="Facebook">Facebook</a></li>
-                        <li class="list-inline-item mb-2 d-block"><a href="#" class="text-white text-decoration-none hover-effect social-link" data-platform="Twitter">Twitter</a></li>
-                        <li class="list-inline-item mb-2 d-block"><a href="#" class="text-white text-decoration-none hover-effect social-link" data-platform="Instagram">Instagram</a></li>
-                        <li class="list-inline-item mb-2 d-block"><a href="#" class="text-white text-decoration-none hover-effect social-link" data-platform="LinkedIn">LinkedIn</a></li>
-                        <li class="list-inline-item mb-2 d-block"><a href="#" class="text-white text-decoration-none hover-effect social-link" data-platform="GitHub">GitHub</a></li>
+                <div class="col-lg-2 mb-4">
+                    <h6 class="footer-title">Support</h6>
+                    <ul class="footer-links">
+                        <li><a href="#">Help Center</a></li>
+                        <li><a href="#">Contact Us</a></li>
+                        <li><a href="#">Status</a></li>
                     </ul>
+                </div>
+                <div class="col-lg-4 mb-4">
+                    <h6 class="footer-title">Connect</h6>
+                    <div class="social-links">
+                        <a href="#" class="social-link"><i class="bi bi-twitter"></i></a>
+                        <a href="#" class="social-link"><i class="bi bi-github"></i></a>
+                        <a href="#" class="social-link"><i class="bi bi-linkedin"></i></a>
+                        <a href="#" class="social-link"><i class="bi bi-youtube"></i></a>
+                    </div>
                 </div>
             </div>
-            <hr class="my-4 bg-light">
-            <div class="text-center">
-                <p class="mb-0">© 2024 Group Chat. All rights reserved.</p>
+            <hr class="footer-divider">
+            <div class="footer-bottom">
+                <p>&copy; 2025 Chatify. All rights reserved.</p>
             </div>
         </div>
     </footer>
-    
-    <div class="toast-container position-fixed bottom-0 end-0 p-3">
-        <div id="socialToast" class="toast" role="alert" aria-live="assertive" aria-atomic="true">
-            <div class="toast-header">
-                <strong class="me-auto">Notification</strong>
-                <button type="button" class="btn-close" data-bs-dismiss="toast" aria-label="Close"></button>
-            </div>
-            <div class="toast-body">
-                There are no contacts for this link.
-            </div>
-        </div>
-    </div>
-
-    <style>
-        .bg-gradient-dark {
-            background: linear-gradient(45deg, #1a1a1a, #2c3e50);
-        }
-        .hover-effect:hover {
-            color: #007bff !important;
-            transition: color 0.3s ease;
-        }
-    </style>
-
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.bundle.min.js"></script>
-    <script src="app.js"></script>
     <script>
-        document.addEventListener('DOMContentLoaded', function() {
-            const socialLinks = document.querySelectorAll('.social-link');
-            const toast = new bootstrap.Toast(document.getElementById('socialToast'));
-
-            socialLinks.forEach(link => {
-                link.addEventListener('click', function(e) {
+        // Smooth scrolling for navigation links
+        document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+            anchor.addEventListener('click', function (e) {
                     e.preventDefault();
-                    const platform = this.getAttribute('data-platform');
-                    document.querySelector('#socialToast .toast-body').textContent = `There are no contacts for ${platform}.`;
-                    toast.show();
+                const target = document.querySelector(this.getAttribute('href'));
+                if (target) {
+                    target.scrollIntoView({
+                        behavior: 'smooth',
+                        block: 'start'
+                    });
+                }
                 });
             });
+
+        // Add animation on scroll
+        const observerOptions = {
+            threshold: 0.1,
+            rootMargin: '0px 0px -50px 0px'
+        };
+
+        const observer = new IntersectionObserver((entries) => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    entry.target.classList.add('animate-in');
+                }
+            });
+        }, observerOptions);
+
+        // Observe all cards and feature items
+        document.querySelectorAll('.discord-card, .feature-item').forEach(el => {
+            observer.observe(el);
         });
     </script>
 </body>

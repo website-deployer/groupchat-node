@@ -1,18 +1,129 @@
-const socket = io();
+const socket = io({
+  reconnection: true,
+  reconnectionDelay: 1000,
+  reconnectionAttempts: 5,
+  timeout: 20000,
+});
 
 const urlParams = new URLSearchParams(window.location.search);
 const username = urlParams.get('name');
 const room = urlParams.get('room');
 
-document.getElementById('roomName').textContent = room;
+// Ensure elements exist before accessing them
+const roomNameElement = document.getElementById('roomName');
+if (roomNameElement) {
+    roomNameElement.textContent = room;
+}
 
-socket.emit('joinRoom', { username, room });
+// Connection status indicators
+let isConnected = false;
+let reconnectAttempts = 0;
+
+// Handle connection events
+socket.on('connect', () => {
+  console.log('Connected to server');
+  isConnected = true;
+  reconnectAttempts = 0;
+  updateConnectionStatus('connected');
+  socket.emit('joinRoom', { username, room });
+});
+
+socket.on('disconnect', (reason) => {
+  console.log('Disconnected from server:', reason);
+  isConnected = false;
+  updateConnectionStatus('disconnected');
+});
+
+socket.on('reconnect', () => {
+  console.log('Reconnected to server');
+  isConnected = true;
+  updateConnectionStatus('connected');
+  socket.emit('joinRoom', { username, room });
+});
+
+socket.on('reconnect_attempt', (attemptNumber) => {
+  console.log('Reconnection attempt:', attemptNumber);
+  reconnectAttempts = attemptNumber;
+  updateConnectionStatus('reconnecting');
+});
+
+socket.on('reconnect_error', (error) => {
+  console.log('Reconnection error:', error);
+  updateConnectionStatus('error');
+});
+
+socket.on('reconnect_failed', () => {
+  console.log('Reconnection failed');
+  updateConnectionStatus('failed');
+});
+
+// Update connection status UI
+function updateConnectionStatus(status) {
+  let statusElement = document.getElementById('connectionStatus');
+  if (!statusElement) {
+    const container = document.querySelector('.discord-navbar .container-fluid');
+    if (!container) return; // Exit if container doesn't exist
+    
+    const statusDiv = document.createElement('div');
+    statusDiv.id = 'connectionStatus';
+    statusDiv.className = 'connection-status';
+    container.appendChild(statusDiv);
+    statusElement = statusDiv;
+  }
+  
+  switch (status) {
+    case 'connected':
+      statusElement.innerHTML = '<i class="bi bi-wifi text-success"></i> Connected';
+      statusElement.className = 'connection-status text-success';
+      break;
+    case 'disconnected':
+      statusElement.innerHTML = '<i class="bi bi-wifi-off text-warning"></i> Disconnected';
+      statusElement.className = 'connection-status text-warning';
+      break;
+    case 'reconnecting':
+      statusElement.innerHTML = `<i class="bi bi-arrow-clockwise text-info"></i> Reconnecting... (${reconnectAttempts})`;
+      statusElement.className = 'connection-status text-info';
+      break;
+    case 'error':
+      statusElement.innerHTML = '<i class="bi bi-exclamation-triangle text-danger"></i> Connection Error';
+      statusElement.className = 'connection-status text-danger';
+      break;
+    case 'failed':
+      statusElement.innerHTML = '<i class="bi bi-x-circle text-danger"></i> Connection Failed';
+      statusElement.className = 'connection-status text-danger';
+      break;
+  }
+}
 
 let isTabActive = true;
 let notificationPermission = false;
 
 socket.on('roomUsers', ({ room, users }) => {
     outputUsers(users);
+});
+
+// Handle message history
+socket.on('messageHistory', (history) => {
+    console.log('Received message history:', history.length, 'messages');
+    const chatMessages = document.querySelector('#chatMessages');
+    
+    if (!chatMessages) {
+        console.error('Chat messages container not found');
+        return;
+    }
+    
+    // Clear existing messages
+    chatMessages.innerHTML = '';
+    
+    // Add historical messages
+    if (Array.isArray(history)) {
+        history.forEach(message => {
+            outputMessage(message, false); // false = don't scroll to bottom
+        });
+    }
+    
+    // Scroll to bottom after loading history
+    scrollToBottom();
 });
 
 socket.on('message', message => {
@@ -24,78 +135,187 @@ socket.on('message', message => {
             icon: '/path/to/your/icon.png'
         });
     }
+});
+
+// Auto-resize textarea
+function autoResizeTextarea(textarea) {
+    if (!textarea) return;
+    textarea.style.height = 'auto';
+    textarea.style.height = Math.min(textarea.scrollHeight, 120) + 'px';
+}
+
+function outputMessage(message, shouldScroll = true) {
+    if (!message || !message.username || !message.text) {
+        console.error('Invalid message object:', message);
+        return;
+    }
     
-    document.querySelector('#chatMessages').scrollTop = document.querySelector('#chatMessages').scrollHeight;
-});
-
-document.getElementById('messageForm').addEventListener('submit', (e) => {
-    e.preventDefault();
-    const msg = e.target.elements.messageInput.value;
-    socket.emit('chatMessage', msg);
-    e.target.elements.messageInput.value = '';
-    e.target.elements.messageInput.focus();
-});
-
-document.getElementById('leaveChat').addEventListener('click', () => {
-    window.location = '/';
-});
-
-function outputMessage(message) {
     const div = document.createElement('div');
-    div.classList.add('message', message.username === username ? 'message-own' : 'message-other');
+    div.classList.add('discord-message');
+    
+    // Generate avatar initials safely
+    const initials = message.username.split(' ').map(n => n[0]).join('').toUpperCase().slice(0, 2);
+    
     div.innerHTML = `
-        <div class="message-header">
-            <span class="message-username">${message.username}</span>
-            <span class="message-time">${message.time}</span>
-        </div>
-        <div class="message-body">
-            <p>${message.text}</p>
+        <div class="discord-message-avatar">${initials}</div>
+        <div class="discord-message-content">
+            <div class="discord-message-header">
+                <span class="discord-message-username">${message.username}</span>
+                <span class="discord-message-time">${message.time || new Date().toLocaleTimeString()}</span>
+            </div>
+            <div class="discord-message-text">${message.text}</div>
         </div>
     `;
-    document.querySelector('#chatMessages').appendChild(div);
-
+    
     const chatMessages = document.querySelector('#chatMessages');
-    chatMessages.scrollTop = chatMessages.scrollHeight;
+    if (chatMessages) {
+        chatMessages.appendChild(div);
+        
+        if (shouldScroll) {
+            scrollToBottom();
+        }
+    } else {
+        console.error('Chat messages container not found');
+    }
 }
 
 function outputUsers(users) {
-    document.getElementById('participantsList').innerHTML = `
+    const participantsList = document.getElementById('participantsList');
+    if (!participantsList) {
+        console.error('Participants list container not found');
+        return;
+    }
+    
+    if (!Array.isArray(users)) {
+        console.error('Invalid users array:', users);
+        return;
+    }
+    
+    participantsList.innerHTML = `
         ${users.map(user => `
             <li class="list-group-item">
-                <span class="status-indicator ${user.status}"></span>
-                <i class="bi bi-person-circle me-2"></i>
-                ${user.username}
+                <div class="d-flex align-items-center">
+                    <span class="status-indicator ${user.status || 'online'}"></span>
+                    <div class="discord-user-avatar me-2">
+                        ${user.username ? user.username.split(' ').map(n => n[0]).join('').toUpperCase().slice(0, 2) : '??'}
+                    </div>
+                    <span class="discord-username">${user.username || 'Unknown User'}</span>
+                </div>
             </li>
         `).join('')}
     `;
 }
 
-const messageInput = document.getElementById('messageInput');
-let typingTimer;
+function scrollToBottom() {
+    const chatMessages = document.querySelector('#chatMessages');
+    if (chatMessages) {
+        chatMessages.scrollTop = chatMessages.scrollHeight;
+    }
+}
 
-messageInput.addEventListener('input', () => {
-    clearTimeout(typingTimer);
-    socket.emit('typing');
+function showConnectionError() {
+    // Create or update error message
+    let errorDiv = document.getElementById('connectionError');
+    if (!errorDiv) {
+        const inputArea = document.querySelector('.discord-input-area');
+        const inputGroup = document.querySelector('.discord-input-group');
+        
+        if (!inputArea || !inputGroup) {
+            console.error('Input area or input group not found');
+            return;
+        }
+        
+        errorDiv = document.createElement('div');
+        errorDiv.id = 'connectionError';
+        errorDiv.className = 'alert alert-warning alert-dismissible fade show';
+        errorDiv.innerHTML = `
+            <i class="bi bi-exclamation-triangle me-2"></i>
+            <strong>Connection Lost!</strong> Please check your internet connection and try again.
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        `;
+        inputArea.insertBefore(errorDiv, inputGroup);
+    }
     
-    typingTimer = setTimeout(() => {
-        socket.emit('stopTyping');
-    }, 1000);
-});
+    // Auto-hide after 5 seconds
+    setTimeout(() => {
+        if (errorDiv && errorDiv.parentNode) {
+            errorDiv.remove();
+        }
+    }, 5000);
+}
 
-messageInput.addEventListener('blur', () => {
-    clearTimeout(typingTimer);
-    socket.emit('stopTyping');
+// Wait for DOM to be ready before adding event listeners
+document.addEventListener('DOMContentLoaded', () => {
+    const messageForm = document.getElementById('messageForm');
+    if (messageForm) {
+        messageForm.addEventListener('submit', (e) => {
+            e.preventDefault();
+            const msg = e.target.elements.messageInput.value.trim();
+            if (msg && isConnected) {
+                socket.emit('chatMessage', msg);
+                
+                // Add to message history
+                if (window.chatEnhancements) {
+                    window.chatEnhancements.addToHistory(msg);
+                }
+                
+                e.target.elements.messageInput.value = '';
+                autoResizeTextarea(e.target.elements.messageInput);
+            } else if (!isConnected) {
+                // Show connection error
+                showConnectionError();
+            }
+        });
+    }
+
+    // Add auto-resize functionality
+    const messageInput = document.getElementById('messageInput');
+    if (messageInput) {
+        messageInput.addEventListener('input', () => {
+            autoResizeTextarea(messageInput);
+        });
+    }
+
+    // Leave chat button
+    const leaveChatBtn = document.getElementById('leaveChat');
+    if (leaveChatBtn) {
+        leaveChatBtn.addEventListener('click', () => {
+            window.location = '/';
+        });
+    }
+
+    // Typing indicators
+    let typingTimer;
+    if (messageInput) {
+        messageInput.addEventListener('input', () => {
+            clearTimeout(typingTimer);
+            socket.emit('typing');
+            
+            typingTimer = setTimeout(() => {
+                socket.emit('stopTyping');
+            }, 1000);
+        });
+
+        messageInput.addEventListener('blur', () => {
+            clearTimeout(typingTimer);
+            socket.emit('stopTyping');
+        });
+    }
 });
 
 socket.on('typing', (username) => {
     const typingIndicator = document.getElementById('typingIndicator');
-    typingIndicator.textContent = `${username} is typing...`;
-    typingIndicator.style.display = 'block';
+    if (typingIndicator) {
+        typingIndicator.innerHTML = `<i class="bi bi-three-dots"></i> ${username} is typing...`;
+        typingIndicator.style.display = 'block';
+    }
 });
 
 socket.on('stopTyping', () => {
     const typingIndicator = document.getElementById('typingIndicator');
-    typingIndicator.style.display = 'none';
+    if (typingIndicator) {
+        typingIndicator.style.display = 'none';
+    }
 });
 
 window.addEventListener('focus', () => {

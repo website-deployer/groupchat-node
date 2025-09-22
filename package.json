@@ -1,7 +1,7 @@
 {
-  "name": "group-chat",
-  "version": "1.0.0",
-  "description": "Group Chat Website",
+  "name": "chatify",
+  "version": "2.0.0",
+  "description": "Chatify - Next-Gen Communication Platform",
   "main": "server.js",
   "scripts": {
     "start": "node server.js",

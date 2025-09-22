@@ -1,0 +1,457 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Chatify - Connecting...</title>
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.7.2/font/bootstrap-icons.css">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: #36393f;
+            height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            overflow: hidden;
+            position: relative;
+        }
+
+        body::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: radial-gradient(ellipse at center, rgba(88, 101, 242, 0.1) 0%, transparent 70%);
+            pointer-events: none;
+        }
+
+        .transfer-container {
+            text-align: center;
+            color: #dcddde;
+            z-index: 10;
+            max-width: 500px;
+            width: 100%;
+            padding: 2rem;
+        }
+
+        .loading-card {
+            background: #2f3136;
+            border: 1px solid #4f545c;
+            border-radius: 16px;
+            padding: 3rem 2rem;
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.4);
+            backdrop-filter: blur(10px);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .loading-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 4px;
+            background: linear-gradient(90deg, #5865f2, #7289da, #5865f2);
+            background-size: 200% 100%;
+            animation: gradientShift 2s ease-in-out infinite;
+        }
+
+        .chatify-logo {
+            width: 80px;
+            height: 80px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 auto 1.5rem;
+            box-shadow: 0 8px 24px rgba(88, 101, 242, 0.3);
+            animation: logoPulse 2s ease-in-out infinite;
+            overflow: hidden;
+            border: 2px solid #5865f2;
+        }
+
+        .logo-image {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            border-radius: 50%;
+        }
+
+        .transfer-title {
+            font-size: 2rem;
+            font-weight: 700;
+            margin-bottom: 0.5rem;
+            color: #ffffff;
+            animation: fadeInUp 0.8s ease 0.2s both;
+        }
+
+        .transfer-subtitle {
+            font-size: 1rem;
+            color: #b9bbbe;
+            margin-bottom: 2rem;
+            animation: fadeInUp 0.8s ease 0.4s both;
+        }
+
+        .loading-animation {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 0.75rem;
+            margin-bottom: 2rem;
+        }
+
+        .loading-dot {
+            width: 8px;
+            height: 8px;
+            background: #5865f2;
+            border-radius: 50%;
+            animation: loadingBounce 1.4s ease-in-out infinite both;
+        }
+
+        .loading-dot:nth-child(1) { animation-delay: -0.32s; }
+        .loading-dot:nth-child(2) { animation-delay: -0.16s; }
+        .loading-dot:nth-child(3) { animation-delay: 0s; }
+
+        .progress-container {
+            margin: 2rem 0;
+        }
+
+        .progress-bar {
+            width: 100%;
+            height: 6px;
+            background: #4f545c;
+            border-radius: 3px;
+            overflow: hidden;
+            position: relative;
+            margin-bottom: 1rem;
+        }
+
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #5865f2, #7289da, #5865f2);
+            background-size: 200% 100%;
+            border-radius: 3px;
+            animation: progressLoad 3s ease-in-out forwards, gradientShift 2s ease-in-out infinite;
+            position: relative;
+        }
+
+        .progress-fill::after {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.3), transparent);
+            animation: shimmer 1.5s ease-in-out infinite;
+        }
+
+        .status-text {
+            font-size: 0.9rem;
+            color: #b9bbbe;
+            animation: statusFade 0.5s ease-in-out;
+            margin-bottom: 1rem;
+        }
+
+        .connection-stats {
+            background: rgba(47, 49, 54, 0.8);
+            border: 1px solid #4f545c;
+            border-radius: 12px;
+            padding: 1.5rem;
+            margin-top: 2rem;
+            backdrop-filter: blur(10px);
+        }
+
+        .stat-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 0.75rem;
+            padding: 0.5rem 0;
+        }
+
+        .stat-item:last-child {
+            margin-bottom: 0;
+        }
+
+        .stat-label {
+            color: #b9bbbe;
+            font-size: 0.9rem;
+        }
+
+        .stat-value {
+            font-weight: 600;
+            color: #5865f2;
+            font-size: 0.9rem;
+        }
+
+        .particles {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            overflow: hidden;
+            z-index: 1;
+        }
+
+        .particle {
+            position: absolute;
+            background: rgba(88, 101, 242, 0.1);
+            border-radius: 50%;
+            animation: particleFloat 8s linear infinite;
+        }
+
+        .particle:nth-child(1) { width: 3px; height: 3px; left: 10%; animation-delay: 0s; }
+        .particle:nth-child(2) { width: 4px; height: 4px; left: 20%; animation-delay: 1s; }
+        .particle:nth-child(3) { width: 2px; height: 2px; left: 30%; animation-delay: 2s; }
+        .particle:nth-child(4) { width: 3px; height: 3px; left: 40%; animation-delay: 3s; }
+        .particle:nth-child(5) { width: 2px; height: 2px; left: 50%; animation-delay: 4s; }
+        .particle:nth-child(6) { width: 4px; height: 4px; left: 60%; animation-delay: 5s; }
+        .particle:nth-child(7) { width: 2px; height: 2px; left: 70%; animation-delay: 0.5s; }
+        .particle:nth-child(8) { width: 3px; height: 3px; left: 80%; animation-delay: 1.5s; }
+        .particle:nth-child(9) { width: 2px; height: 2px; left: 90%; animation-delay: 2.5s; }
+
+        @keyframes logoPulse {
+            0%, 100% { 
+                transform: scale(1);
+                box-shadow: 0 8px 24px rgba(88, 101, 242, 0.3);
+            }
+            50% { 
+                transform: scale(1.05);
+                box-shadow: 0 12px 32px rgba(88, 101, 242, 0.5);
+            }
+        }
+
+        @keyframes gradientShift {
+            0% { background-position: 0% 50%; }
+            50% { background-position: 100% 50%; }
+            100% { background-position: 0% 50%; }
+        }
+
+        @keyframes shimmer {
+            0% { transform: translateX(-100%); }
+            100% { transform: translateX(100%); }
+        }
+
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        @keyframes loadingBounce {
+            0%, 80%, 100% {
+                transform: scale(0);
+            }
+            40% {
+                transform: scale(1);
+            }
+        }
+
+        @keyframes progressLoad {
+            0% { width: 0%; }
+            25% { width: 30%; }
+            50% { width: 60%; }
+            75% { width: 85%; }
+            100% { width: 100%; }
+        }
+
+        @keyframes statusFade {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+
+        @keyframes particleFloat {
+            0% {
+                transform: translateY(100vh) rotate(0deg);
+                opacity: 0;
+            }
+            10% {
+                opacity: 1;
+            }
+            90% {
+                opacity: 1;
+            }
+            100% {
+                transform: translateY(-100px) rotate(360deg);
+                opacity: 0;
+            }
+        }
+
+        .nexus-brand {
+            position: absolute;
+            bottom: 2rem;
+            left: 50%;
+            transform: translateX(-50%);
+            font-size: 0.9rem;
+            color: #72767d;
+            animation: fadeInUp 1s ease 1s both;
+            z-index: 10;
+        }
+
+        /* Responsive Design */
+        @media (max-width: 768px) {
+            .transfer-container {
+                padding: 1rem;
+            }
+            
+            .loading-card {
+                padding: 2rem 1.5rem;
+            }
+            
+            .transfer-title {
+                font-size: 1.75rem;
+            }
+            
+            .connection-stats {
+                padding: 1rem;
+            }
+        }
+
+    </style>
+</head>
+<body>
+    <div class="particles">
+        <div class="particle"></div>
+        <div class="particle"></div>
+        <div class="particle"></div>
+        <div class="particle"></div>
+        <div class="particle"></div>
+        <div class="particle"></div>
+        <div class="particle"></div>
+        <div class="particle"></div>
+        <div class="particle"></div>
+    </div>
+
+    <div class="transfer-container">
+        <div class="loading-card">
+            <div class="chatify-logo">
+                <img src="logo.webp" alt="Chatify Logo" class="logo-image">
+            </div>
+            
+            <h1 class="transfer-title">Chatify</h1>
+            <p class="transfer-subtitle">Establishing your connection...</p>
+            
+            <div class="loading-animation">
+                <div class="loading-dot"></div>
+                <div class="loading-dot"></div>
+                <div class="loading-dot"></div>
+            </div>
+            
+            <div class="progress-container">
+                <div class="progress-bar">
+                    <div class="progress-fill"></div>
+                </div>
+                <div class="status-text" id="statusText">Initializing connection...</div>
+            </div>
+
+            <div class="connection-stats">
+                <div class="stat-item">
+                    <span class="stat-label">Connection:</span>
+                    <span class="stat-value" id="connectionStatus">Establishing...</span>
+                </div>
+                <div class="stat-item">
+                    <span class="stat-label">Latency:</span>
+                    <span class="stat-value" id="latency">-- ms</span>
+                </div>
+                <div class="stat-item">
+                    <span class="stat-label">Users Online:</span>
+                    <span class="stat-value" id="userCount">--</span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="nexus-brand">
+        <i class="bi bi-lightning-charge me-1"></i>
+        Chatify - Next-Gen Communication
+    </div>
+
+    <script>
+        // Status messages that change during loading
+        const statusMessages = [
+            "Initializing connection...",
+            "Authenticating user...",
+            "Loading chat interface...",
+            "Synchronizing data...",
+            "Almost ready..."
+        ];
+
+        let currentStatus = 0;
+        const statusElement = document.getElementById('statusText');
+
+        function updateStatus() {
+            if (currentStatus < statusMessages.length) {
+                statusElement.textContent = statusMessages[currentStatus];
+                statusElement.style.animation = 'none';
+                setTimeout(() => {
+                    statusElement.style.animation = 'statusFade 0.5s ease-in-out';
+                }, 10);
+                currentStatus++;
+            }
+        }
+
+        // Update status every 600ms
+        const statusInterval = setInterval(updateStatus, 600);
+
+        // Simulate connection stats
+        function updateStats() {
+            const connectionStatus = document.getElementById('connectionStatus');
+            const latency = document.getElementById('latency');
+            const userCount = document.getElementById('userCount');
+            
+            // Simulate connection progress
+            const progress = Math.min((Date.now() - startTime) / 3000, 1);
+            
+            if (progress < 0.3) {
+                connectionStatus.textContent = 'Connecting...';
+                latency.textContent = '-- ms';
+            } else if (progress < 0.7) {
+                connectionStatus.textContent = 'Authenticating...';
+                latency.textContent = Math.floor(Math.random() * 50 + 20) + ' ms';
+            } else {
+                connectionStatus.textContent = 'Connected';
+                latency.textContent = Math.floor(Math.random() * 30 + 10) + ' ms';
+                userCount.textContent = Math.floor(Math.random() * 50 + 10);
+            }
+        }
+
+        const startTime = Date.now();
+        const statsInterval = setInterval(updateStats, 200);
+
+        // Redirect after 3 seconds
+        setTimeout(() => {
+            clearInterval(statusInterval);
+            clearInterval(statsInterval);
+            // Get the target URL from query parameters
+            const urlParams = new URLSearchParams(window.location.search);
+            const targetUrl = urlParams.get('redirect') || '/chat.html';
+            
+            // Add a fade out effect
+            document.body.style.transition = 'opacity 0.5s ease';
+            document.body.style.opacity = '0';
+            
+            setTimeout(() => {
+                window.location.href = targetUrl;
+            }, 500);
+        }, 3000);
+    </script>
+</body>
+</html>
