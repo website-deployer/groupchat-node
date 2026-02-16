@@ -1232,3 +1232,186 @@ body.discord-theme {
 .glow-danger {
     box-shadow: 0 0 20px rgba(237, 66, 69, 0.3);
 }
+/* Enhanced chat features */
+.chat-file {
+    margin-top: 0.65rem;
+    border: 1px solid var(--discord-border);
+    border-radius: var(--discord-radius);
+    background: rgba(255, 255, 255, 0.04);
+    padding: 0.75rem;
+}
+
+.chat-file-header {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    margin-bottom: 0.5rem;
+}
+
+.chat-file-header a {
+    color: #8ea1ff;
+    text-decoration: none;
+    font-weight: 600;
+}
+
+.chat-file-header a:hover {
+    text-decoration: underline;
+}
+
+.chat-file-image {
+    width: 100%;
+    max-width: 320px;
+    border-radius: var(--discord-radius);
+    border: 1px solid var(--discord-border);
+}
+
+.chat-file-meta {
+    font-size: 0.8rem;
+    color: var(--discord-text-secondary);
+}
+
+.composer-toolbar {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 0.5rem 1.5rem 0;
+    color: var(--discord-text-muted);
+    font-size: 0.8rem;
+}
+
+.composer-hint {
+    display: flex;
+    align-items: center;
+    gap: 0.35rem;
+}
+
+.composer-char-count {
+    font-weight: 600;
+}
+
+.composer-char-count-warning {
+    color: var(--discord-warning);
+}
+
+.message-search-container {
+    padding: 0.75rem;
+    border-bottom: 1px solid var(--discord-border);
+}
+
+.search-input-group {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    background: var(--discord-bg);
+    border: 1px solid var(--discord-border);
+    border-radius: var(--discord-radius);
+    padding: 0.45rem 0.65rem;
+    color: var(--discord-text-muted);
+}
+
+.search-input-group input {
+    width: 100%;
+    border: none;
+    outline: none;
+    background: transparent;
+    color: var(--discord-text);
+    font-size: 0.9rem;
+}
+
+.message-hidden {
+    display: none;
+}
+
+/* ChatGPT + Apple inspired refinements */
+.apple-chat-theme {
+    background: radial-gradient(circle at top, #1f2937, #0b1220 65%);
+}
+
+.glass-navbar {
+    backdrop-filter: blur(14px);
+    background: rgba(18, 24, 37, 0.75);
+}
+
+.chat-top-controls {
+    gap: 0.5rem;
+}
+
+#assistantMode {
+    max-width: 190px;
+    background: rgba(255, 255, 255, 0.1);
+    color: #f1f5f9;
+    border: 1px solid rgba(255, 255, 255, 0.25);
+}
+
+#assistantMode option {
+    color: #111827;
+}
+
+.discord-message {
+    background: rgba(255, 255, 255, 0.01);
+    border-radius: 14px;
+    padding: 0.75rem;
+}
+
+.assistant-message {
+    border: 1px solid rgba(52, 211, 153, 0.4);
+    background: linear-gradient(135deg, rgba(16, 185, 129, 0.15), rgba(30, 64, 175, 0.15));
+}
+
+.system-message {
+    border: 1px solid rgba(148, 163, 184, 0.3);
+    background: rgba(148, 163, 184, 0.1);
+}
+
+.poll-card {
+    margin-top: 0.65rem;
+    border: 1px solid var(--discord-border);
+    border-radius: var(--discord-radius);
+    background: rgba(15, 23, 42, 0.7);
+    padding: 0.75rem;
+}
+
+.poll-question {
+    font-weight: 600;
+    margin-bottom: 0.5rem;
+}
+
+.poll-options {
+    display: grid;
+    gap: 0.4rem;
+}
+
+.poll-option {
+    border: 1px solid rgba(148, 163, 184, 0.35);
+    background: rgba(148, 163, 184, 0.12);
+    color: var(--discord-text);
+    border-radius: 10px;
+    padding: 0.45rem 0.6rem;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    transition: var(--discord-transition);
+}
+
+.poll-option:hover {
+    border-color: #60a5fa;
+    background: rgba(59, 130, 246, 0.18);
+}
+
+.poll-option-votes {
+    color: var(--discord-text-secondary);
+    font-size: 0.82rem;
+}
+
+.poll-total {
+    margin-top: 0.5rem;
+    color: var(--discord-text-muted);
+    font-size: 0.82rem;
+}
+
+@media (max-width: 900px) {
+    #assistantMode {
+        max-width: 145px;
+        font-size: 0.78rem;
+    }
+}

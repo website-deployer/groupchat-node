@@ -8,25 +8,25 @@ const MessageHistory = require('./utils/messageHistory');
 
 const app = express();
 const server = http.createServer(app);
-const io = socketio(server);
+const io = socketio(server, {
+  maxHttpBufferSize: 6 * 1024 * 1024
+});
 
 const port = process.env.PORT || 3000;
-const botName = 'ChatifyBot';
+const botName = 'Chatify Assistant';
+const MAX_MESSAGE_LENGTH = 8000;
+const MAX_FILE_SIZE = 5 * 1024 * 1024;
+const GEMINI_API_KEY = process.env.GEMINI_API_KEY || 'AIzaSyDdb9CwRD5CpkC28n91zrE9WwMoFQTgwoY';
+const GEMINI_MODELS = ['gemini-3.0-flash', 'gemini-2.5-flash', 'gemini-2.0-flash'];
 
-// Initialize message history
 const messageHistory = new MessageHistory();
+const roomPolls = new Map(); // room -> Map(pollId => poll)
 
-// Middleware to parse JSON and urlencoded data
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
-
-// Serve static files from the 'public' directory
 app.use(express.static('public'));
-
-// Serve static files from the 'views' directory
 app.use(express.static('views'));
 
-// Health check endpoint
 app.get('/health', (req, res) => {
   res.status(200).json({
     status: 'healthy',
@@ -37,122 +37,340 @@ app.get('/health', (req, res) => {
   });
 });
 
-// Serve index.html for the root route
 app.get('/', (req, res) => {
   res.sendFile(path.join(__dirname, 'public', 'index.html'));
 });
 
-// Handle chat room join
 app.post('/join', (req, res) => {
-  const { name, roomCode } = req.body;
-  
+  const name = (req.body.name || '').trim();
+  const roomCode = (req.body.roomCode || '').trim();
+
   if (name && roomCode) {
     res.redirect(`/transfer-screen.html?redirect=${encodeURIComponent(`/chat.html?name=${encodeURIComponent(name)}&room=${encodeURIComponent(roomCode)}`)}`);
-  } else {
-    res.redirect('/?error=invalid');
+    return;
   }
+
+  res.redirect('/?error=invalid');
 });
-  // Run when client connects
-  io.on('connection', socket => {
-    console.log(`User connected: ${socket.id}`);
 
-    socket.on('joinRoom', ({ username, room }) => {
-      const user = userJoin(socket.id, username, room);
-      socket.join(user.room);
+function sanitizeText(value) {
+  return value
+    .toString()
+    .replace(/\r\n/g, '\n')
+    .replace(/\u0000/g, '')
+    .slice(0, MAX_MESSAGE_LENGTH)
+    .trim();
+}
 
-      // Send message history to the user
-      const history = messageHistory.getMessages(user.room, 50);
-      socket.emit('messageHistory', history);
+function sendRoomUsers(room) {
+  io.to(room).emit('roomUsers', {
+    room,
+    users: getRoomUsers(room)
+  });
+}
 
-      // Welcome current user
-      const welcomeMessage = formatMessage(botName, `Welcome to ${user.room}, ${user.username}! 🎉`);
-      socket.emit('message', welcomeMessage);
-      messageHistory.addMessage(user.room, welcomeMessage);
+function ensureRoomPolls(room) {
+  if (!roomPolls.has(room)) {
+    roomPolls.set(room, new Map());
+  }
+  return roomPolls.get(room);
+}
 
-      // Broadcast when a user connects
-      const joinMessage = formatMessage(botName, `${user.username} joined the server`);
-      socket.broadcast
-        .to(user.room)
-        .emit('message', joinMessage);
-      messageHistory.addMessage(user.room, joinMessage);
+function getFallbackReply(prompt) {
+  const normalized = prompt.toLowerCase();
 
-      // Send users and room info
-      io.to(user.room).emit('roomUsers', {
-        room: user.room,
-        users: getRoomUsers(user.room)
+  if (normalized.includes('help')) {
+    return 'I can help summarize ideas, draft replies, create action plans, and assist with decisions. Try asking for a summary, roadmap, or polished response.';
+  }
+
+  if (normalized.includes('summary') || normalized.includes('summarize')) {
+    return 'Summary: your room supports long-form messages, file sharing, polls, and assistant prompts for faster decision-making.';
+  }
+
+  if (normalized.includes('roadmap') || normalized.includes('plan')) {
+    return 'Suggested plan: 1) Define goals 2) Open a poll 3) Share relevant files 4) Assign owners 5) Track updates in-thread.';
+  }
+
+  return 'Thanks! I can turn that into a cleaner draft, checklist, or decision poll if you want.';
+}
+
+async function generateAssistantReply({ prompt, mode, room, username }) {
+  const contextMessages = messageHistory
+    .getMessages(room, 12)
+    .filter(message => message.type === 'text')
+    .slice(-8)
+    .map(message => `${message.username}: ${message.text}`)
+    .join('\n');
+
+  const systemInstruction = `You are Chatify Assistant inside a group chat app. Keep answers useful, concise, and specific.\nMode: ${mode}.\nIf asked for plans/summaries, provide structured bullet points.\nUser: ${username}.`;
+
+  const userPrompt = `Conversation context:\n${contextMessages || '(no recent context)'}\n\nCurrent user prompt:\n${prompt}`;
+
+  const payload = {
+    contents: [{ role: 'user', parts: [{ text: userPrompt }] }],
+    systemInstruction: { role: 'system', parts: [{ text: systemInstruction }] },
+    generationConfig: {
+      temperature: mode === 'creative' ? 1.0 : mode === 'concise' ? 0.4 : 0.7,
+      topP: 0.9,
+      maxOutputTokens: 450
+    }
+  };
+
+  const controller = new AbortController();
+  const timeout = setTimeout(() => controller.abort(), 12000);
+
+  try {
+    for (const model of GEMINI_MODELS) {
+      const endpoint = `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${GEMINI_API_KEY}`;
+      const response = await fetch(endpoint, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify(payload),
+        signal: controller.signal
       });
 
-      // Typing indicators
-      socket.on('typing', () => {
-        const user = getCurrentUser(socket.id);
-        if (user) {
-          socket.broadcast.to(user.room).emit('typing', user.username);
-        }
-      });
-    
-      socket.on('stopTyping', () => {
-        const user = getCurrentUser(socket.id);
-        if (user) {
-          socket.broadcast.to(user.room).emit('stopTyping', user.username);
-        }
-      });
-    });
-
-    // Listen for chatMessage
-    socket.on('chatMessage', msg => {
-      const user = getCurrentUser(socket.id);
-      if (user) {
-        const message = formatMessage(user.username, msg);
-        io.to(user.room).emit('message', message);
-        messageHistory.addMessage(user.room, message);
+      if (!response.ok) {
+        continue;
       }
-    });
 
-    // Runs when client disconnects
-    socket.on('disconnect', (reason) => {
-      console.log(`User disconnected: ${socket.id}, reason: ${reason}`);
-      const user = userLeave(socket.id);
-
-      if (user) {
-        const leaveMessage = formatMessage(botName, `${user.username} left the server`);
-        io.to(user.room).emit('message', leaveMessage);
-        messageHistory.addMessage(user.room, leaveMessage);
-
-        // Send users and room info
-        io.to(user.room).emit('roomUsers', {
-          room: user.room,
-          users: getRoomUsers(user.room)
-        });
+      const data = await response.json();
+      const text = data?.candidates?.[0]?.content?.parts?.map(part => part.text).join('\n').trim();
+      if (text) {
+        clearTimeout(timeout);
+        return text.slice(0, MAX_MESSAGE_LENGTH);
       }
-    });
+    }
 
-    // Handle reconnection
-    socket.on('reconnect', () => {
-      console.log(`User reconnected: ${socket.id}`);
-      // Update user status to online
-      const user = getCurrentUser(socket.id);
-      if (user) {
-        updateUserStatus(socket.id, 'online');
-        io.to(user.room).emit('roomUsers', {
-          room: user.room,
-          users: getRoomUsers(user.room)
-        });
-      }
-    });
+    return getFallbackReply(prompt);
+  } catch (error) {
+    console.error('Assistant generation failed:', error.message);
+    return getFallbackReply(prompt);
+  } finally {
+    clearTimeout(timeout);
+  }
+}
 
-    socket.on('updateStatus', (status) => {
-      const user = updateUserStatus(socket.id, status);
-      if (user) {
-        io.to(user.room).emit('roomUsers', {
-          room: user.room,
-          users: getRoomUsers(user.room)
-        });
-      }
-    });
+async function emitAssistantReply({ socket, user, prompt, mode }) {
+  const safeMode = sanitizeText(mode || 'balanced').slice(0, 20) || 'balanced';
+  const safePrompt = sanitizeText(prompt || '');
+  if (!safePrompt) return;
+
+  const responseText = await generateAssistantReply({
+    prompt: safePrompt,
+    mode: safeMode,
+    room: user.room,
+    username: user.username
   });
 
-// Error handling
-process.on('uncaughtException', (err) => {
+  const botMessage = {
+    ...formatMessage(botName, responseText),
+    type: 'text',
+    meta: { role: 'assistant', mode: safeMode }
+  };
+
+  io.to(user.room).emit('message', botMessage);
+  messageHistory.addMessage(user.room, botMessage);
+}
+
+io.on('connection', socket => {
+  console.log(`User connected: ${socket.id}`);
+
+  socket.on('joinRoom', ({ username, room }) => {
+    const safeUsername = sanitizeText(username || 'Guest').slice(0, 30);
+    const safeRoom = sanitizeText(room || 'general').slice(0, 40);
+
+    const user = userJoin(socket.id, safeUsername || 'Guest', safeRoom || 'general');
+    socket.join(user.room);
+
+    const history = messageHistory.getMessages(user.room, 120);
+    socket.emit('messageHistory', history);
+
+    const welcomeMessage = {
+      ...formatMessage(botName, `Welcome to ${user.room}, ${user.username}. You can share files, create polls, and use the assistant tools from the top action bar.`),
+      type: 'text',
+      meta: { role: 'assistant' }
+    };
+    socket.emit('message', welcomeMessage);
+
+    const joinMessage = {
+      ...formatMessage(botName, `${user.username} joined the room`),
+      type: 'text',
+      meta: { role: 'system' }
+    };
+    socket.broadcast.to(user.room).emit('message', joinMessage);
+    messageHistory.addMessage(user.room, joinMessage);
+
+    sendRoomUsers(user.room);
+  });
+
+  socket.on('chatMessage', async rawMessage => {
+    const user = getCurrentUser(socket.id);
+    if (!user) return;
+
+    const cleanedText = sanitizeText(rawMessage);
+    if (!cleanedText) return;
+
+    const message = {
+      ...formatMessage(user.username, cleanedText),
+      type: 'text'
+    };
+
+    io.to(user.room).emit('message', message);
+    messageHistory.addMessage(user.room, message);
+
+    if (cleanedText.startsWith('/ai ')) {
+      const prompt = cleanedText.slice(4).trim();
+      await emitAssistantReply({ socket, user, prompt, mode: 'balanced' });
+    }
+  });
+
+  socket.on('assistantPrompt', async payload => {
+    const user = getCurrentUser(socket.id);
+    if (!user || !payload) return;
+
+    const prompt = sanitizeText(payload.prompt || '');
+    const mode = sanitizeText(payload.mode || 'balanced').slice(0, 20);
+    if (!prompt) return;
+
+    await emitAssistantReply({ socket, user, prompt, mode });
+  });
+
+  socket.on('createPoll', payload => {
+    const user = getCurrentUser(socket.id);
+    if (!user || !payload) return;
+
+    const question = sanitizeText(payload.question || '').slice(0, 240);
+    const options = Array.isArray(payload.options)
+      ? payload.options.map(option => sanitizeText(option).slice(0, 90)).filter(Boolean).slice(0, 6)
+      : [];
+
+    if (!question || options.length < 2) {
+      socket.emit('pollError', 'A poll needs a question and at least 2 options.');
+      return;
+    }
+
+    const pollId = `${Date.now().toString(36)}-${Math.random().toString(36).slice(2, 8)}`;
+    const poll = {
+      id: pollId,
+      room: user.room,
+      createdBy: user.username,
+      question,
+      options: options.map((option, index) => ({ index, option, votes: 0 })),
+      voters: {}
+    };
+
+    const roomPollMap = ensureRoomPolls(user.room);
+    roomPollMap.set(pollId, poll);
+
+    const pollMessage = {
+      ...formatMessage(user.username, `Poll: ${question}`),
+      type: 'poll',
+      poll
+    };
+
+    io.to(user.room).emit('message', pollMessage);
+    messageHistory.addMessage(user.room, pollMessage);
+  });
+
+  socket.on('votePoll', payload => {
+    const user = getCurrentUser(socket.id);
+    if (!user || !payload) return;
+
+    const pollId = sanitizeText(payload.pollId || '').slice(0, 60);
+    const optionIndex = Number(payload.optionIndex);
+    const roomPollMap = ensureRoomPolls(user.room);
+    const poll = roomPollMap.get(pollId);
+
+    if (!poll || Number.isNaN(optionIndex) || !poll.options[optionIndex]) {
+      socket.emit('pollError', 'Poll vote was invalid.');
+      return;
+    }
+
+    const previousVote = poll.voters[socket.id];
+    if (previousVote !== undefined && poll.options[previousVote]) {
+      poll.options[previousVote].votes = Math.max(0, poll.options[previousVote].votes - 1);
+    }
+
+    poll.voters[socket.id] = optionIndex;
+    poll.options[optionIndex].votes += 1;
+
+    const pollMessage = {
+      ...formatMessage(botName, `${user.username} voted on: ${poll.question}`),
+      type: 'poll-update',
+      poll
+    };
+
+    io.to(user.room).emit('pollUpdate', pollMessage);
+  });
+
+  socket.on('fileUpload', payload => {
+    const user = getCurrentUser(socket.id);
+    if (!user || !payload) return;
+
+    const name = sanitizeText(payload.name || 'attachment').slice(0, 120);
+    const type = sanitizeText(payload.type || 'application/octet-stream').slice(0, 100);
+    const size = Number(payload.size) || 0;
+    const data = typeof payload.data === 'string' ? payload.data : '';
+
+    if (!name || !data.startsWith('data:') || data.length < 30) {
+      socket.emit('uploadError', 'Invalid file payload.');
+      return;
+    }
+
+    if (size > MAX_FILE_SIZE) {
+      socket.emit('uploadError', `File is too large. Max size is ${Math.round(MAX_FILE_SIZE / (1024 * 1024))}MB.`);
+      return;
+    }
+
+    const fileMessage = {
+      ...formatMessage(user.username, `${user.username} shared a file: ${name}`),
+      type: 'file',
+      file: { name, type, size, data }
+    };
+
+    io.to(user.room).emit('message', fileMessage);
+    messageHistory.addMessage(user.room, fileMessage);
+  });
+
+  socket.on('typing', () => {
+    const user = getCurrentUser(socket.id);
+    if (user) {
+      socket.broadcast.to(user.room).emit('typing', user.username);
+    }
+  });
+
+  socket.on('stopTyping', () => {
+    const user = getCurrentUser(socket.id);
+    if (user) {
+      socket.broadcast.to(user.room).emit('stopTyping', user.username);
+    }
+  });
+
+  socket.on('updateStatus', status => {
+    const user = updateUserStatus(socket.id, status);
+    if (user) sendRoomUsers(user.room);
+  });
+
+  socket.on('disconnect', reason => {
+    console.log(`User disconnected: ${socket.id}, reason: ${reason}`);
+    const user = userLeave(socket.id);
+    if (!user) return;
+
+    const leaveMessage = {
+      ...formatMessage(botName, `${user.username} left the room`),
+      type: 'text',
+      meta: { role: 'system' }
+    };
+
+    io.to(user.room).emit('message', leaveMessage);
+    messageHistory.addMessage(user.room, leaveMessage);
+    sendRoomUsers(user.room);
+  });
+});
+
+process.on('uncaughtException', err => {
   console.error('Uncaught Exception:', err);
   process.exit(1);
 });
@@ -162,7 +380,6 @@ process.on('unhandledRejection', (reason, promise) => {
   process.exit(1);
 });
 
-// Graceful shutdown
 process.on('SIGTERM', () => {
   console.log('SIGTERM received, shutting down gracefully');
   server.close(() => {
@@ -179,7 +396,6 @@ process.on('SIGINT', () => {
   });
 });
 
-// Start the server
 server.listen(port, () => {
   console.log(`Chatify server running on port ${port}`);
   console.log(`Environment: ${process.env.NODE_ENV || 'development'}`);
